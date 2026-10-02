@@ -1,0 +1,231 @@
+/* ==========================================================================
+   blog.css — Trang danh sách tin tức (blog.html)
+   ========================================================================== */
+
+.blog-container {
+  padding-block: var(--space-7);
+}
+
+/* Bài viết bên trái, thanh bên phải */
+.blog-container .body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: var(--space-7);
+  align-items: start;
+}
+
+/* --------------------------------------------------------------------------
+   1. DANH SÁCH BÀI VIẾT
+   -------------------------------------------------------------------------- */
+.blog-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  gap: var(--space-5);
+}
+
+/* HTML gốc gộp 2 bài vào một .blog-item. display:contents làm lớp bọc này
+   "trong suốt", để .item-1 và .item-2 trở thành ô của lưới bên trên —
+   nhờ vậy lưới tự xuống dòng mà không phải sửa HTML. */
+.blog-item {
+  display: contents;
+}
+
+.item-1,
+.item-2 {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-white);
+  transition: transform var(--t-base) var(--ease-out),
+    box-shadow var(--t-base), border-color var(--t-base);
+}
+
+.item-1:hover,
+.item-2:hover {
+  transform: translateY(-6px);
+  border-color: transparent;
+  box-shadow: var(--shadow-lg);
+}
+
+.blog-img {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background-color: var(--color-bg-soft);
+}
+
+.blog-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--t-slow) var(--ease-out);
+}
+
+.item-1:hover .blog-img img,
+.item-2:hover .blog-img img {
+  transform: scale(1.07);
+}
+
+/* Thẻ <br> trong HTML gốc không cần thiết nữa */
+.item-1 br,
+.item-2 br {
+  display: none;
+}
+
+.desc {
+  display: block;
+  padding: var(--space-4);
+  font-size: var(--text-base);
+  font-weight: 600;
+  line-height: 1.55;
+  transition: color var(--t-fast);
+}
+
+.desc:hover {
+  color: var(--color-primary);
+}
+
+/* --------------------------------------------------------------------------
+   2. THANH BÊN
+   -------------------------------------------------------------------------- */
+.side-bar {
+  position: sticky;
+  top: calc(var(--header-h) + var(--space-4));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.categories,
+.tags-container {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-white);
+}
+
+.categories h2,
+.categories h3,
+.tags-container h2,
+.tags-container h3 {
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 2px solid var(--color-primary);
+  font-size: var(--text-xl);
+  font-weight: 700;
+}
+
+.categories ul li {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.categories ul li:last-child {
+  border-bottom: 0;
+}
+
+.categories ul li a {
+  display: block;
+  padding: 11px 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  transition: color var(--t-fast), padding-left var(--t-fast);
+}
+
+.categories ul li a:hover {
+  padding-left: var(--space-2);
+  color: var(--color-primary);
+}
+
+/* --- Thẻ tag --- */
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tag {
+  display: inline-block;
+  padding: 7px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  font-size: 1.3rem;
+  transition: background-color var(--t-fast), color var(--t-fast),
+    border-color var(--t-fast), transform var(--t-fast);
+}
+
+.tag:hover,
+.tag.active {
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+/* --------------------------------------------------------------------------
+   3. PHÂN TRANG
+   -------------------------------------------------------------------------- */
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-7);
+}
+
+.page-link {
+  display: grid;
+  place-items: center;
+  min-width: 42px;
+  height: 42px;
+  padding-inline: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  transition: background-color var(--t-fast), color var(--t-fast),
+    border-color var(--t-fast), transform var(--t-fast);
+}
+
+.page-link:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.page-link.active {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+/* ==========================================================================
+   4. RESPONSIVE
+   ========================================================================== */
+
+/* --- Tablet: thanh bên xuống dưới danh sách bài --- */
+@media (max-width: 992px) {
+  .blog-container .body {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  .side-bar {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .blog-content {
+    grid-template-columns: 1fr;
+  }
+
+  .side-bar {
+    grid-template-columns: 1fr;
+  }
+}

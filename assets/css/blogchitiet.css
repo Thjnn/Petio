@@ -1,0 +1,263 @@
+/* ==========================================================================
+   blogchitiet.css — Trang chi tiết bài viết (blogchitiet.html)
+   Thanh bên (.side-bar, .categories, .tag...) dùng lại đúng kiểu của blog.css
+   nhưng blog.css không được nạp ở trang này, nên khai báo lại ở đây.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. ẢNH BÌA + TIÊU ĐỀ
+   -------------------------------------------------------------------------- */
+.hero {
+  position: relative;
+}
+
+.hero .box-img img {
+  width: 100%;
+  height: clamp(260px, 34vw, 420px);
+  object-fit: cover;
+}
+
+/* Phủ tối để chữ trắng luôn đọc rõ */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.25) 0%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+}
+
+.hero-summary {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 2;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding: var(--container-pad);
+  color: var(--color-white);
+  text-align: center;
+  animation: fade-up 0.8s var(--ease-out) both;
+}
+
+.hero-summary h1 {
+  display: inline-block;
+  margin-bottom: var(--space-3);
+  padding: 5px 16px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-primary);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.hero-summary p {
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* --------------------------------------------------------------------------
+   2. BỐ CỤC: bài viết + thanh bên
+   -------------------------------------------------------------------------- */
+.blog-container {
+  padding-block: var(--space-7);
+}
+
+.blog-container .body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: var(--space-7);
+  align-items: start;
+}
+
+/* --------------------------------------------------------------------------
+   3. NỘI DUNG BÀI VIẾT
+   -------------------------------------------------------------------------- */
+.blog-content {
+  max-width: 760px;
+}
+
+.blog-content h2,
+.blog-content h3 {
+  margin-block: var(--space-6) var(--space-3);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.blog-content h3 {
+  color: var(--color-primary);
+}
+
+.blog-content p {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-muted);
+  line-height: 1.9;
+}
+
+.blog-content img {
+  width: 100%;
+  margin-block: var(--space-5);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.blog-content ul {
+  margin-bottom: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary-soft);
+}
+
+.blog-content li {
+  position: relative;
+  margin-bottom: var(--space-2);
+  padding-left: var(--space-4);
+  color: var(--color-text-muted);
+  line-height: 1.75;
+}
+
+.blog-content li:last-child {
+  margin-bottom: 0;
+}
+
+/* reset.css bỏ list-style nên tự vẽ dấu đầu dòng */
+.blog-content li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 11px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+}
+
+.blog-content strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   4. THANH BÊN
+   -------------------------------------------------------------------------- */
+.side-bar {
+  position: sticky;
+  top: calc(var(--header-h) + var(--space-4));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.categories,
+.tags-container {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-white);
+}
+
+.categories h2,
+.categories h3,
+.tags-container h2,
+.tags-container h3 {
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 2px solid var(--color-primary);
+  color: var(--color-text);
+  font-size: var(--text-xl);
+  font-weight: 700;
+}
+
+.categories ul {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.categories ul li {
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.categories ul li::before {
+  display: none;
+}
+
+.categories ul li:last-child {
+  border-bottom: 0;
+}
+
+.categories ul li a {
+  display: block;
+  padding: 11px 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  transition: color var(--t-fast), padding-left var(--t-fast);
+}
+
+.categories ul li a:hover {
+  padding-left: var(--space-2);
+  color: var(--color-primary);
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tag {
+  display: inline-block;
+  padding: 7px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text-muted);
+  font-size: 1.3rem;
+  transition: background-color var(--t-fast), color var(--t-fast),
+    border-color var(--t-fast), transform var(--t-fast);
+}
+
+.tag:hover,
+.tag.active {
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+/* ==========================================================================
+   5. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 992px) {
+  .blog-container .body {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  .blog-content {
+    max-width: 100%;
+  }
+
+  .side-bar {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .side-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .blog-content ul {
+    padding: var(--space-3) var(--space-4);
+  }
+}

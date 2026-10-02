@@ -1,0 +1,181 @@
+/* ==========================================================================
+   lienhe.css — Trang liên hệ (lienhe.html)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. ẢNH BÌA
+   -------------------------------------------------------------------------- */
+.hero .banner-img img {
+  width: 100%;
+  height: clamp(200px, 26vw, 360px);
+  margin-top: var(--space-5);
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+}
+
+/* --------------------------------------------------------------------------
+   2. BỐ CỤC: thông tin bên trái, form bên phải
+   -------------------------------------------------------------------------- */
+.content-contact {
+  padding-block: var(--space-7);
+}
+
+.content-contact .body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: var(--space-7);
+  align-items: start;
+}
+
+/* --------------------------------------------------------------------------
+   3. THÔNG TIN LIÊN HỆ
+   -------------------------------------------------------------------------- */
+.thongtinlienhe h1 {
+  margin-bottom: var(--space-5);
+  font-size: var(--text-3xl);
+  font-weight: 700;
+}
+
+.box-thongtin {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-white);
+  transition: transform var(--t-base) var(--ease-out),
+    border-color var(--t-base), box-shadow var(--t-base);
+}
+
+.box-thongtin:hover {
+  transform: translateX(6px);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.box-thongtin .material-symbols-outlined {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 24px;
+}
+
+.box-thongtin .desc h3 {
+  margin-bottom: 2px;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.box-thongtin .desc p {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------------
+   4. FORM GỬI THẮC MẮC
+   -------------------------------------------------------------------------- */
+.formthacmac {
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-soft);
+}
+
+.formthacmac h1 {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+}
+
+.formthacmac > p {
+  margin-bottom: var(--space-5);
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Hai ô Email và SĐT đứng cạnh nhau, tự xuống dòng khi hẹp */
+.contact-form .row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: var(--space-4);
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-white);
+  font-size: var(--text-sm);
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(237, 100, 54, 0.15);
+}
+
+.contact-form textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.contact-form button {
+  align-self: flex-start;
+  padding: 14px 32px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  transition: background-color var(--t-base), transform var(--t-fast),
+    box-shadow var(--t-base);
+}
+
+.contact-form button:hover {
+  transform: translateY(-2px);
+  background-color: var(--color-text);
+  box-shadow: var(--shadow-md);
+}
+
+/* ==========================================================================
+   5. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 992px) {
+  .content-contact .body {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+}
+
+@media (max-width: 768px) {
+  .formthacmac {
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .box-thongtin:hover {
+    transform: none;
+  }
+
+  .contact-form button {
+    align-self: stretch;
+    text-align: center;
+  }
+}

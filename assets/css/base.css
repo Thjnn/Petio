@@ -1,0 +1,519 @@
+/* ==========================================================================
+   base.css — Nền tảng dùng chung cho toàn bộ website Petio
+   Chứa: biến thiết kế (token), typography, tiện ích dùng lại, animation.
+   Nạp NGAY SAU reset.css và TRƯỚC mọi file CSS của từng trang.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. BIẾN THIẾT KẾ (Design tokens)
+   Đổi màu / khoảng cách của cả web chỉ bằng cách sửa ở đây.
+   -------------------------------------------------------------------------- */
+:root {
+  /* Màu thương hiệu */
+  --color-primary: #ed6436;
+  --color-primary-dark: #d1582f;
+  --color-primary-light: #ff8a5c;
+  --color-primary-soft: #fff1eb;
+
+  --color-header: #f9942a;
+  --color-header-dark: #ef8511;
+  --color-accent-green: #3f953c;
+
+  /* Màu trung tính */
+  --color-text: #1f2024;
+  --color-text-muted: #6b6b6b;
+  --color-text-light: #868686;
+  --color-white: #ffffff;
+  --color-bg: #ffffff;
+  --color-bg-soft: #faf7f4;
+  --color-border: #e6e6e6;
+  --color-dark: #292a2e;
+
+  /* Trạng thái */
+  --color-danger: #e02b2b;
+  --color-star: #ffa800;
+
+  /* Thang khoảng cách */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Khoảng cách giữa các section: co lại trên màn hình nhỏ */
+  --section-gap: clamp(56px, 8vw, 140px);
+
+  /* Bề rộng nội dung tối đa + lề an toàn hai bên */
+  --container-max: 1440px;
+  --container-pad: clamp(16px, 4vw, 40px);
+
+  /* Bo góc */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  /* Đổ bóng */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.14);
+
+  /* Thang chữ — clamp(nhỏ nhất, co giãn theo màn hình, lớn nhất) */
+  --font-body: "Poppins", "Segoe UI", sans-serif;
+  --font-display: "Alfa Slab One", serif;
+  --font-alt: "Nunito", sans-serif;
+
+  --text-sm: 1.4rem;
+  --text-base: 1.6rem;
+  --text-lg: 1.8rem;
+  --text-xl: clamp(1.8rem, 1.5vw, 2rem);
+  --text-2xl: clamp(2rem, 2vw, 2.5rem);
+  --text-3xl: clamp(2.4rem, 3.2vw, 3.6rem);
+  --text-4xl: clamp(2.6rem, 4vw, 4rem);
+  --text-5xl: clamp(3.2rem, 5.5vw, 5rem);
+
+  /* Thời lượng chuyển động */
+  --t-fast: 0.18s;
+  --t-base: 0.3s;
+  --t-slow: 0.6s;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Chiều cao header — dùng để chừa chỗ cho header cố định */
+  --header-h: 88px;
+}
+
+/* --------------------------------------------------------------------------
+   2. NỀN TẢNG
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* 1rem = 10px cho dễ tính toán */
+  font-size: 62.5%;
+  scroll-behavior: smooth;
+  /* Chừa chỗ cho header cố định khi nhảy tới #anchor */
+  scroll-padding-top: calc(var(--header-h) + 16px);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  /* Chặn tràn ngang — lỗi hay gặp nhất khi làm responsive */
+  overflow-x: hidden;
+}
+
+/* Chừa chỗ cho header cố định để nội dung không bị che */
+body {
+  padding-top: var(--header-h);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img,
+video,
+iframe {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* reset.css không đụng tới form — chuẩn hóa ở đây */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+/* Viền focus rõ ràng cho người dùng bàn phím */
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* --------------------------------------------------------------------------
+   3. TIỆN ÍCH BỐ CỤC
+   -------------------------------------------------------------------------- */
+
+/* Khung nội dung: luôn có lề hai bên, không bao giờ tràn màn hình */
+.container,
+.main-content,
+.main-content-recommend {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+/* Khoảng cách dọc chuẩn giữa các khối lớn */
+.section {
+  padding-block: var(--section-gap);
+}
+
+.section-title {
+  text-align: center;
+  font-size: var(--text-4xl);
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: var(--space-6);
+}
+
+.section-title .hl {
+  color: var(--color-primary);
+}
+
+/* Lưới tự xuống dòng — thay cho flex + space-around cứng.
+   Dùng: <div class="grid" style="--min: 260px"> hoặc đặt --min trong CSS trang. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--min, 240px), 1fr));
+  gap: var(--gap, var(--space-5));
+}
+
+/* Chỉ hiện cho trình đọc màn hình */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   4. NÚT BẤM
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: 118px;
+  padding: 13px 24px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-text);
+  color: var(--color-white);
+  font-size: var(--text-base);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color var(--t-base), color var(--t-base),
+    transform var(--t-fast), box-shadow var(--t-base);
+}
+
+.btn:hover {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.btn-light {
+  background-color: var(--color-white);
+  color: var(--color-text);
+}
+
+.btn-light:hover {
+  background-color: var(--color-text);
+  color: var(--color-white);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   5. THẺ (card) — dùng chung cho sản phẩm, bài viết, dịch vụ
+   -------------------------------------------------------------------------- */
+.card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: transform var(--t-base) var(--ease-out),
+    box-shadow var(--t-base) var(--ease-out), border-color var(--t-base);
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: transparent;
+}
+
+/* Khung ảnh tỉ lệ cố định — ảnh không bao giờ méo hay tràn */
+.media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: var(--ratio, 1 / 1);
+  background: var(--color-bg-soft);
+}
+
+.media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--t-slow) var(--ease-out);
+}
+
+.card:hover .media img {
+  transform: scale(1.07);
+}
+
+/* Nhãn góc ảnh (-20%, Hot) */
+.badge {
+  position: absolute;
+  z-index: 2;
+  top: var(--space-3);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  color: var(--color-white);
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.badge-deal {
+  left: var(--space-3);
+  background-color: var(--color-danger);
+}
+
+.badge-hot {
+  right: var(--space-3);
+  background-color: var(--color-primary);
+}
+
+/* Sao đánh giá */
+.checked,
+.rating .checked {
+  color: var(--color-star);
+}
+
+/* --------------------------------------------------------------------------
+   6. ANIMATION
+   Chỉ dùng transform + opacity (mượt, không gây tính lại bố cục).
+   -------------------------------------------------------------------------- */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes badge-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* --- Scroll reveal ---
+   Phần tử có class .reveal bị ẩn sẵn; main.js gắn .is-visible khi cuộn tới. */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity var(--t-slow) var(--ease-out),
+    transform var(--t-slow) var(--ease-out);
+  transition-delay: var(--reveal-delay, 0s);
+  will-change: opacity, transform;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Biến thể hướng vào */
+.reveal-left {
+  transform: translateX(-32px);
+}
+
+.reveal-right {
+  transform: translateX(32px);
+}
+
+.reveal-zoom {
+  transform: scale(0.94);
+}
+
+.reveal-left.is-visible,
+.reveal-right.is-visible,
+.reveal-zoom.is-visible {
+  transform: none;
+}
+
+/* Độ trễ so le cho các thẻ trong cùng một hàng */
+.reveal-d1 {
+  --reveal-delay: 0.08s;
+}
+.reveal-d2 {
+  --reveal-delay: 0.16s;
+}
+.reveal-d3 {
+  --reveal-delay: 0.24s;
+}
+.reveal-d4 {
+  --reveal-delay: 0.32s;
+}
+.reveal-d5 {
+  --reveal-delay: 0.4s;
+}
+
+/* main.js tự rải độ trễ cho các con của .reveal-stagger */
+.reveal-stagger > * {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity var(--t-slow) var(--ease-out),
+    transform var(--t-slow) var(--ease-out);
+}
+
+.reveal-stagger.is-visible > * {
+  opacity: 1;
+  transform: none;
+}
+
+/* --------------------------------------------------------------------------
+   7. TÔN TRỌNG LỰA CHỌN CỦA NGƯỜI DÙNG
+   Ai bật "giảm chuyển động" trong hệ điều hành thì trang hiện tĩnh hoàn toàn,
+   nhưng KHÔNG mất nội dung.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .reveal,
+  .reveal-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. BREAKPOINT CHUẨN CỦA DỰ ÁN
+   >= 1200px  desktop (mặc định)
+   <  1200px  laptop
+   <   992px  tablet
+   <   768px  mobile — chuyển sang menu hamburger
+   <   576px  mobile nhỏ
+   -------------------------------------------------------------------------- */
+@media (max-width: 992px) {
+  :root {
+    --header-h: 76px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --header-h: 68px;
+  }
+
+  .btn {
+    padding: 11px 20px;
+    min-width: 0;
+  }
+}
