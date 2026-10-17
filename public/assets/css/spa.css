@@ -1,0 +1,158 @@
+/* ==========================================================================
+   spa.css — Trang dịch vụ chăm sóc (spa.html)
+   Đây là trang bài viết dài, nên ưu tiên: dòng chữ không quá dài, cỡ chữ đọc
+   thoải mái trên điện thoại, ảnh không bao giờ tràn.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. KHUNG BÀI VIẾT
+   -------------------------------------------------------------------------- */
+.main .content {
+  /* Giới hạn ~75 ký tự mỗi dòng — dài hơn là mỏi mắt */
+  max-width: 900px;
+  margin-inline: auto;
+  padding: var(--space-7) var(--container-pad) var(--space-6);
+}
+
+.content .title {
+  margin-bottom: var(--space-6);
+  color: var(--color-primary);
+  font-size: var(--text-4xl);
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.content h1 {
+  margin-block: var(--space-6) var(--space-3);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.content h2 {
+  margin-block: var(--space-5) var(--space-2);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.content p {
+  margin-bottom: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--text-base);
+  line-height: 1.85;
+}
+
+.content strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.content a {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   2. ẢNH TRONG BÀI
+   -------------------------------------------------------------------------- */
+.content img {
+  width: 100%;
+  height: auto;
+  margin-block: var(--space-5);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--t-base) var(--ease-out),
+    box-shadow var(--t-base);
+}
+
+.content img:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+/* --- Bộ ảnh "sau khi spa" --- */
+.nhomanh {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: var(--space-4);
+  margin-block: var(--space-5);
+}
+
+.nhomanh img {
+  margin: 0;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+/* Khối "đăng ký nhận tin" (.bennefit) nằm ở layout.css vì được dùng chung
+   với blog, blogchitiet, FAQ, lienhe và aboutus. */
+
+/* ==========================================================================
+   3. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 768px) {
+  .main .content {
+    padding-top: var(--space-6);
+  }
+
+  .nhomanh {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  .content img:hover {
+    /* Trên điện thoại không có chuột — bỏ hiệu ứng nhấc lên */
+    transform: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Bảng giá spa (đọc từ bảng spa_services / spa_service_prices)
+   -------------------------------------------------------------------------- */
+.spa-prices {
+  margin: var(--space-5) 0;
+  overflow-x: auto;
+}
+
+.spa-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.spa-table th,
+.spa-table td {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+}
+
+.spa-table th {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  font-weight: 600;
+}
+
+.spa-table th small {
+  display: block;
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+.spa-table td:first-child {
+  font-weight: 600;
+  text-align: left;
+}
+
+.spa-table tbody tr:nth-child(even) {
+  background-color: var(--color-primary-soft);
+}
+
+.spa-range {
+  margin-top: var(--space-3);
+}
