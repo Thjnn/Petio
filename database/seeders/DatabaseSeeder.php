@@ -24,6 +24,13 @@ class DatabaseSeeder extends Seeder
             'created_at' => $now, 'updated_at' => $now,
         ]);
 
+        // Khách hàng mẫu để thử đăng nhập / đặt hàng (mật khẩu tạm: Khach@12345)
+        DB::table('users')->insert([
+            'id' => 2, 'username' => 'khachhang', 'email' => 'khachhang@petio.local', 'phone' => '0900000001',
+            'password' => Hash::make('Khach@12345'), 'full_name' => 'Nguyễn Văn Khách', 'role' => 'customer',
+            'created_at' => $now, 'updated_at' => $now,
+        ]);
+
         // ---------- Danh mục ----------
         $categories = [
             [1, null, 'Thức ăn thú cưng', 'thuc-an'],

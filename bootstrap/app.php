@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Link tạm (cloudflared, chia-se-link.bat) chạy trên máy này và báo https qua header:
+        // chỉ tin proxy từ localhost để link ảnh/CSS ra đúng https.
+        $middleware->trustProxies(at: ['127.0.0.1', '::1']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
