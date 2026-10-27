@@ -28,14 +28,14 @@
 
                 <div class="applienket">
                   <div class="applienket-items">
-                    <a href="https://www.facebook.com/">
-                      <img src="{{ asset('assets/file_anh/fb-removebg-preview.png') }}" alt="" class="app-logo" />
+                    <a href="{{ route('social.redirect', 'facebook') }}">
+                      <img src="{{ asset('assets/file_anh/fb-removebg-preview.png') }}" alt="Facebook" class="app-logo" />
                       <p>Facebook</p>
                     </a>
                   </div>
                   <div class="applienket-items">
-                    <a href="https://www.google.com/">
-                      <img src="{{ asset('assets/file_anh/Google__G__logo.svg.png') }}" alt="" class="app-logo" />
+                    <a href="{{ route('social.redirect', 'google') }}">
+                      <img src="{{ asset('assets/file_anh/Google__G__logo.svg.png') }}" alt="Google" class="app-logo" />
                       <p>Google</p>
                     </a>
                   </div>
