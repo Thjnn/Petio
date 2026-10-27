@@ -7,24 +7,24 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactController;
-use App\Http\Controllers\Customer\AccountController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ShopController;
-use App\Http\Middleware\CustomerAccount;
 use App\Models\Faq;
 use App\Models\SpaService;
 use Illuminate\Support\Facades\Route;
 
 // Auth
 Route::middleware('guest')->group(function () {
-    Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])
-        ->whereIn('provider', ['google', 'facebook'])->name('social.redirect');
-    Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])
-        ->whereIn('provider', ['google', 'facebook'])->name('social.callback');
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
+
+    // Đăng nhập / đăng ký bằng Google, Facebook
+    Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])
+        ->whereIn('provider', ['google', 'facebook'])->name('social.redirect');
+    Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])
+        ->whereIn('provider', ['google', 'facebook'])->middleware('throttle:10,1')->name('social.callback');
 });
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
@@ -46,7 +46,6 @@ Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear')
 
 // Thanh toán — khách vãng lai vẫn đặt được (orders.user_id = NULL)
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-Route::post('/checkout/coupon', [CheckoutController::class, 'coupon'])->middleware('throttle:30,1')->name('checkout.coupon');
 Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:10,1')->name('checkout.store');
 Route::get('/orders/{order}/success', [CheckoutController::class, 'success'])->name('checkout.success');
 
@@ -91,34 +90,4 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:admin'])->group
     Route::put('/contacts/{contact}', [Admin\ContactMessageController::class, 'update'])->name('contacts.update');
 
     Route::get('/newsletter', [Admin\NewsletterController::class, 'index'])->name('newsletter.index');
-});
-
-// Khu vực riêng của khách hàng: mọi truy vấn đều giới hạn theo tài khoản đăng nhập.
-Route::prefix('tai-khoan')->name('customer.')->middleware(['auth', CustomerAccount::class])->group(function () {
-    $c = AccountController::class;
-    Route::get('/', [$c, 'index'])->name('dashboard');
-    Route::get('/ho-so', [$c, 'profile'])->name('profile');
-    Route::post('/anh-dai-dien', [$c, 'uploadAvatar'])->name('avatar.update');
-    Route::get('/anh-dai-dien', [$c, 'avatar'])->name('avatar');
-    Route::post('/don-hang/{order}/huy', [$c, 'cancelOrder'])->middleware('throttle:6,1')->name('orders.cancel');
-    Route::put('/ho-so', [$c, 'updateProfile'])->name('profile.update');
-    Route::put('/mat-khau', [$c, 'password'])->middleware('throttle:6,1')->name('password');
-    Route::get('/don-hang', [$c, 'orders'])->name('orders');
-    Route::get('/don-hang/{order}', [$c, 'order'])->name('orders.show');
-    Route::get('/yeu-thich', [$c, 'favorites'])->name('favorites');
-    Route::post('/yeu-thich/{product}', [$c, 'favorite'])->name('favorites.store');
-    Route::delete('/yeu-thich/{product}', [$c, 'unfavorite'])->name('favorites.destroy');
-    Route::get('/thong-bao', [$c, 'notifications'])->name('notifications');
-    Route::patch('/thong-bao/{notice}', [$c, 'notice'])->name('notifications.read');
-    Route::delete('/thong-bao/{notice}', [$c, 'notice'])->name('notifications.destroy');
-    Route::get('/ma-giam-gia', [$c, 'coupons'])->name('coupons');
-    Route::get('/dia-chi', [$c, 'addressIndex'])->name('addresses');
-    Route::get('/dia-chi/them', [$c, 'addressForm'])->name('addresses.create');
-    Route::post('/dia-chi', [$c, 'saveAddress'])->name('addresses.store');
-    Route::get('/dia-chi/{address}/sua', [$c, 'addressForm'])->name('addresses.edit');
-    Route::put('/dia-chi/{address}', [$c, 'saveAddress'])->name('addresses.update');
-    Route::delete('/dia-chi/{address}', [$c, 'deleteAddress'])->name('addresses.destroy');
-    Route::get('/ho-tro', [$c, 'support'])->name('support');
-    Route::view('/bao-mat', 'customer.privacy')->name('privacy');
-    Route::view('/ve-petio','customer.about')->name('about');
 });
