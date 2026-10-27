@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Coupon;
+use App\Models\CustomerAddress;
 use App\Models\Order;
 use App\Models\ProductVariant;
 use App\Support\Cart;
@@ -24,7 +25,19 @@ class CheckoutController extends Controller
 
         $subtotal = $lines->sum('line_total');
 
+        $addresses = collect();
+        $selectedAddress = null;
+        if ($request->user()) {
+            $addresses = CustomerAddress::where('user_id', $request->user()->id)->orderByDesc('is_default')->get();
+            $selectedAddress = $addresses->firstWhere('id', (int) $request->old('address_id', $request->query('address_id'))) ?? $addresses->first();
+        }
+        $coupons = Coupon::where('is_active', true)->get()->filter(fn ($coupon) => $coupon->rejectReason($subtotal, $request->user()) === null);
+
         return view('checkout.index', [
+            'addresses' => $addresses,
+            'selectedAddress' => $selectedAddress,
+            'coupons' => $coupons,
+            'selectedCoupon' => is_string($request->query('coupon')) ? mb_substr($request->query('coupon'), 0, 30) : '',
             'lines' => $lines,
             'subtotal' => $subtotal,
             'shippingFee' => Cart::shippingFee($subtotal),
@@ -34,6 +47,15 @@ class CheckoutController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate(['address_mode' => 'nullable|in:saved,new', 'address_id' => 'nullable|integer']);
+        if ($request->input('address_mode') === 'saved') {
+            abort_unless($request->user(), 403);
+            $address = CustomerAddress::where('user_id', $request->user()->id)->find($request->input('address_id'));
+            if (! $address) {
+                throw ValidationException::withMessages(['address_id' => 'Địa chỉ không còn tồn tại. Hãy chọn lại địa chỉ nhận hàng.']);
+            }
+            $request->merge($address->only(['receiver_name', 'receiver_phone', 'ship_province', 'ship_district', 'ship_ward', 'ship_address']));
+        }
         $data = $request->validate([
             'receiver_name' => 'required|string|max:100',
             'receiver_phone' => ['required', 'regex:/^0[0-9]{9}$/'],
@@ -57,10 +79,10 @@ class CheckoutController extends Controller
             // Khóa các dòng tồn kho trong lúc đặt để hai người không cùng mua món cuối cùng.
             $qty = Cart::quantities();
             $variants = ProductVariant::with('product')->whereIn('id', array_keys($qty))
-                ->where('is_active', true)->lockForUpdate()->get();
+                ->where('is_active', true)->orderBy('id')->lockForUpdate()->get();
 
-            if ($variants->isEmpty()) {
-                throw ValidationException::withMessages(['cart' => 'Giỏ hàng đang trống.']);
+            if ($variants->isEmpty() || $variants->count() !== count($qty)) {
+                throw ValidationException::withMessages(['cart' => 'Giỏ hàng trống hoặc có sản phẩm không còn bán. Vui lòng kiểm tra lại giỏ hàng.']);
             }
 
             foreach ($variants as $v) {
@@ -121,6 +143,18 @@ class CheckoutController extends Controller
         session()->push('placed_orders', $order->order_code);
 
         return redirect()->route('checkout.success', $order);
+    }
+
+    public function coupon(Request $request)
+    {
+        $data = $request->validate(['coupon_code' => 'required|string|max:30']);
+        $subtotal = Cart::lines()->sum('line_total');
+        $coupon = Coupon::where('code', strtoupper(trim($data['coupon_code'])))->first();
+        $reason = $coupon ? $coupon->rejectReason($subtotal, $request->user()) : 'Mã giảm giá không tồn tại.';
+        if ($reason) {
+            throw ValidationException::withMessages(['coupon_code' => $reason]);
+        }
+        return response()->json(['discount' => $coupon->discountFor($subtotal), 'total' => $subtotal - $coupon->discountFor($subtotal) + Cart::shippingFee($subtotal)]);
     }
 
     public function success(Request $request, Order $order)

@@ -38,6 +38,7 @@ class ShopFlowTest extends TestCase
 
     public function test_guest_checkout_applies_coupon_and_decrements_stock(): void
     {
+        $initialCount = Order::count();
         // 2 × Pedigree 400g (57.000) + 1 × size 1.3kg (133.000) = 247.000 → chưa đủ freeship
         $this->postJson('/cart/add', ['variant_id' => 1, 'qty' => 2])->assertOk()->assertJson(['count' => 2]);
         $size13 = ProductVariant::where('sku', 'PT-001-1K3')->value('id');
@@ -49,11 +50,11 @@ class ShopFlowTest extends TestCase
 
         // BIG25 cần đơn từ 1.000.000đ
         $this->post('/checkout', self::ADDRESS + ['coupon_code' => 'BIG25'])->assertSessionHasErrors('coupon_code');
-        $this->assertSame(0, Order::count());
+        $this->assertSame($initialCount, Order::count());
 
         $this->post('/checkout', self::ADDRESS + ['coupon_code' => 'news10'])->assertRedirect();
 
-        $order = Order::with('items')->sole();
+        $order = Order::with('items')->latest('id')->firstOrFail();
         $this->assertSame(247000, $order->subtotal);
         $this->assertSame(24700, $order->discount_amount);
         $this->assertSame(30000, $order->shipping_fee);
@@ -76,7 +77,7 @@ class ShopFlowTest extends TestCase
         $this->post('/checkout', self::ADDRESS + ['coupon_code' => 'FIRST35'])->assertSessionHasErrors('coupon_code');
 
         $this->post('/register', ['login' => '0987654321', 'password' => 'secret12', 'password_confirmation' => 'secret12'])
-            ->assertRedirect('/');
+            ->assertRedirect('/tai-khoan');
         $user = User::where('phone', '0987654321')->sole();
         $this->assertAuthenticatedAs($user);
 

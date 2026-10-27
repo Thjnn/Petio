@@ -149,6 +149,11 @@
         @endif
       </div>
     </main>
+<div class="container" style="margin:20px auto">
+@auth @if(auth()->user()->role === 'customer')
+<form method="post" action="{{ route('customer.favorites.store',$product) }}">@csrf<button class="btn btn-outline" type="submit">♡ Lưu sản phẩm yêu thích</button></form>
+@endif @else <a href="{{ route('login') }}" class="btn btn-outline">Đăng nhập để lưu yêu thích</a> @endauth
+</div>
 @endsection
 
 @push('scripts')

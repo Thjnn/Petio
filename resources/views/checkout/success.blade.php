@@ -44,6 +44,8 @@
         Thanh toán: {{ \App\Models\Order::PAYMENT_METHODS[$order->payment_method] ?? $order->payment_method }}
       </p>
 
+      @if($order->user_id && $order->user_id === auth()->id())<p><a class="btn btn-primary" href="{{ route('customer.orders.show',$order) }}">Theo dõi / quản lý đơn hàng</a></p>@endif
+      @if($order->payment_method === 'bank_transfer')<p>Đơn chưa được xác nhận thanh toán tự động. <a href="{{ route('contact') }}">Liên hệ Petio</a> để nhận thông tin chuyển khoản, kèm mã đơn {{ $order->order_code }}.</p>@endif
       <a href="{{ route('shop') }}" class="btn btn-primary">Tiếp tục mua sắm</a>
     </div>
   </div>

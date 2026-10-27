@@ -62,7 +62,7 @@ class SocialAuthController extends Controller
         $request->session()->regenerate();
         $user->forceFill(['last_login_at' => now()])->save();
 
-        return redirect()->intended($user->can('admin') ? route('admin.dashboard') : route('home'))
+        return redirect()->to($user->can('admin') ? route('admin.dashboard') : route('customer.dashboard'))
             ->with('success', 'Chào mừng '.$user->displayName().' đến với Petio!');
     }
 

@@ -27,6 +27,13 @@
     @endif
   </div>
   <div class="product-body">
+    @auth
+    @if(auth()->user()->role === 'customer')
+    <form method="post" action="{{ route('customer.favorites.store', $product) }}">@csrf
+      <button type="submit" style="background:none;border:0;color:#d1582f;cursor:pointer;padding:8px 0" aria-label="Yêu thích {{ $product->name }}">♡ Lưu yêu thích</button>
+    </form>
+    @endif
+    @else <a href="{{ route('login') }}" style="color:#d1582f">♡ Lưu yêu thích</a> @endauth
     <div class="rating">
       @for ($i = 1; $i <= 5; $i++)
         <span class="fa fa-star {{ $i <= $stars ? 'checked' : '' }}"></span>

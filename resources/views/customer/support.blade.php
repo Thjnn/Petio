@@ -1,0 +1,10 @@
+@extends('customer.layout')
+@section('page-title','Petio luôn lắng nghe')
+@section('account-content')
+<div class="pc-heading"><div><span class="pc-eyebrow">TÀI KHOẢN PETIO</span><h1>Petio luôn lắng nghe</h1><p>Bạn cần hỗ trợ về sản phẩm, giao hàng hay chăm sóc bé?</p></div></div>
+
+<div class="pc-two-col"><form class="pc-panel pc-form" method="post" action="{{ route('contact.store') }}">@csrf<h2>Gửi lời nhắn cho Petio</h2><p class="pc-muted">Nếu liên quan đến đơn hàng, hãy ghi mã đơn để chúng mình tra cứu.</p>
+<label>Họ tên<input name="full_name" value="{{ old('full_name',auth()->user()->full_name) }}" required maxlength="100"></label><label>Email liên hệ<input type="email" name="email" value="{{ old('email',auth()->user()->email) }}" required maxlength="150"></label><label>Số điện thoại<input name="phone" value="{{ old('phone',auth()->user()->phone) }}" required pattern="0[0-9]{9}"></label><label>Bạn cần hỗ trợ điều gì?<textarea name="content" rows="5" required maxlength="5000">{{ old('content') }}</textarea></label><button class="pc-btn">Gửi yêu cầu hỗ trợ</button></form>
+<section class="pc-panel pc-prose"><span class="material-symbols-outlined pc-large-icon">support_agent</span><h2>Có thể bạn đang tìm</h2><details><summary>Tôi theo dõi đơn hàng ở đâu?</summary><p>Mở Đơn hàng, chọn Xem chi tiết để xem trạng thái và lịch sử xử lý.</p></details><details><summary>Làm sao sử dụng mã giảm giá?</summary><p>Mở Ví ưu đãi, sao chép mã còn hiệu lực và nhập tại trang thanh toán. Giá trị đơn cần đáp ứng điều kiện của mã.</p></details><details><summary>Tôi muốn sửa địa chỉ của đơn đã đặt?</summary><p>Gửi yêu cầu kèm mã đơn tại đây. Sửa sổ địa chỉ chỉ áp dụng cho các lần mua tiếp theo.</p></details><a class="pc-text-link" href="{{ route('faq') }}">Xem thêm câu hỏi thường gặp →</a></section></div>
+<section class="pc-panel pc-bottom"><h2>Yêu cầu bạn đã gửi</h2>@forelse($messages as $m)<div class="pc-request"><small>{{ $m->created_at->format('d/m/Y H:i') }}</small><p>{{ $m->content }}</p><span class="pc-badge">Đã ghi nhận yêu cầu</span></div>@empty<p class="pc-muted">Bạn chưa gửi yêu cầu hỗ trợ nào.</p>@endforelse</section>
+@endsection
