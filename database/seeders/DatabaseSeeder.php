@@ -224,5 +224,7 @@ class DatabaseSeeder extends Seeder
             $banner('home_promo', "Dành cho người bạn\nthật sự yêu thương", 'Quà tặng & chăm sóc', 'banner-2.jpg', 'Quà tặng và chăm sóc', 'Mua ngay', 'spa', 2),
             $banner('home_promo', "Mới ra mắt\nnăm nay!", 'Thương hiệu bạn sẽ yêu thích', 'banner-3.jpg', 'Thương hiệu mới', 'Mua ngay', 'shop', 3),
         ]);
+
+        $this->call(DemoOrderSeeder::class);
     }
 }
