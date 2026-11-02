@@ -37,14 +37,20 @@ class OrderController extends Controller
             'note' => 'nullable|string|max:255',
         ]);
 
+        if (in_array($order->status, Order::FINAL_STATUSES, true) && $data['status'] !== $order->status) {
+            return back()->withErrors(['status' => 'Đơn đã hủy/trả hàng, không đổi trạng thái được nữa.']);
+        }
+
         DB::transaction(function () use ($data, $order, $request) {
-            $order = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
-            if (in_array($order->status, Order::FINAL_STATUSES, true) && $data['status'] !== $order->status) {
-                throw \Illuminate\Validation\ValidationException::withMessages(['status' => 'Đơn đã hủy/trả hàng, không đổi trạng thái được nữa.']);
-            }
             $from = $order->status;
+
+            // Hủy / trả hàng: hoàn lại tồn kho và lượt bán đã trừ lúc đặt
             if ($from !== $data['status'] && in_array($data['status'], Order::FINAL_STATUSES, true)) {
-                app(\App\Support\OrderInventory::class)->restore($order, $data['status'] === 'cancelled');
+                foreach ($order->items as $item) {
+                    $variant = $item->variant_id ? ProductVariant::with('product')->find($item->variant_id) : null;
+                    $variant?->increment('stock_qty', $item->quantity);
+                    $variant?->product->decrement('sold_count', min($item->quantity, $variant->product->sold_count));
+                }
                 $order->cancel_reason = $data['note'] ?? $order->cancel_reason;
             }
 

@@ -46,7 +46,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
         $user->forceFill(['last_login_at' => now()])->save();
 
-        return redirect()->to($user->can('admin') ? route('admin.dashboard') : route('customer.dashboard'))->with('success', 'Chào mừng '.$user->displayName().' quay lại Petio!');
+        return redirect()->intended($user->can('admin') ? route('admin.dashboard') : route('home'))->with('success', 'Chào mừng '.$user->displayName().' quay lại Petio!');
     }
 
     public function register(Request $request)
@@ -84,7 +84,7 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('customer.dashboard')->with('success', 'Đăng ký thành công! Chào mừng bạn đến với Petio 🎉');
+        return redirect()->route('home')->with('success', 'Đăng ký thành công! Chào mừng bạn đến với Petio 🎉');
     }
 
     public function logout(Request $request)

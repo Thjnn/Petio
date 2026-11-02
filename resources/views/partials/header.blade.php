@@ -51,7 +51,6 @@
       </ul>
 
       @auth
-        <a href="{{ route('customer.dashboard') }}" class="nav-account">Tài khoản của tôi</a>
         @can('admin')
           <a href="{{ route('admin.dashboard') }}" class="nav-account">Trang quản trị</a>
         @endcan
@@ -79,11 +78,12 @@
             <span class="material-symbols-outlined">admin_panel_settings</span>
           </a>
         @endcan
-        <a href="{{ route('customer.dashboard') }}" class="action-btn action-account" aria-label="Tài khoản của tôi" title="{{ auth()->user()->displayName() }}">
-          @if(auth()->user()->avatar_url)
-          <img src="{{ auth()->user()->avatarSrc() }}" alt="Ảnh đại diện" style="width:34px;height:34px;object-fit:cover;border-radius:50%" />
-          @else <span class="material-symbols-outlined">account_circle</span> @endif
-        </a>
+        <form action="{{ route('logout') }}" method="post" class="action-account-form">
+          @csrf
+          <button type="submit" class="action-btn action-account" aria-label="Đăng xuất" title="Đăng xuất ({{ auth()->user()->displayName() }})">
+            <span class="material-symbols-outlined">logout</span>
+          </button>
+        </form>
       @else
         <a href="{{ route('login') }}" class="action-btn action-account" aria-label="Tài khoản">
           <span class="material-symbols-outlined">person</span>
