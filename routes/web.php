@@ -97,6 +97,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:admin'])->group
 Route::prefix('tai-khoan')->name('customer.')->middleware(['auth', CustomerAccount::class])->group(function () {
     $c = AccountController::class;
     Route::get('/', [$c, 'index'])->name('dashboard');
+    Route::post('/don-hang/{order}/nhan-hang',[$c,'receiveOrder'])->middleware('throttle:6,1')->name('orders.receive');
+    Route::post('/don-hang/{order}/danh-gia/{item}',[$c,'review'])->middleware('throttle:10,1')->name('orders.review');
+    Route::post('/don-hang/{order}/mua-lai',[$c,'buyAgain'])->middleware('throttle:10,1')->name('orders.buy-again');
+    Route::patch('/dia-chi/{address}/mac-dinh',[$c,'defaultAddress'])->name('addresses.default');
     Route::get('/ho-so', [$c, 'profile'])->name('profile');
     Route::post('/anh-dai-dien', [$c, 'uploadAvatar'])->name('avatar.update');
     Route::get('/anh-dai-dien', [$c, 'avatar'])->name('avatar');

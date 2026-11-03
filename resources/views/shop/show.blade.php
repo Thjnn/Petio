@@ -135,6 +135,7 @@
           </section>
         @endif
 
+        <section id="customer-reviews" class="section" style="padding:32px 0"><h2>Đánh giá từ người đã mua</h2>@forelse($reviews as $review)<article style="padding:20px 0;border-bottom:1px solid #eee"><strong>{{ $review->user?->full_name ?: 'Khách hàng Petio' }}</strong><p style="color:#b76e15" aria-label="{{ $review->rating }} trên 5 sao">{{ str_repeat('★',$review->rating) }}{{ str_repeat('☆',5-$review->rating) }}</p><p>{{ $review->content }}</p><small>{{ $review->created_at->format('d/m/Y') }} · Đã mua hàng tại Petio</small></article>@empty<p>Chưa có đánh giá chi tiết. Bạn đã mua sản phẩm? Vào đơn hàng, xác nhận nhận hàng và chia sẻ trải nghiệm nhé.</p>@endforelse{{ $reviews->fragment('customer-reviews')->links('customer.pagination') }}</section>
         <!-- ================= SẢN PHẨM LIÊN QUAN ================= -->
         @if ($related->isNotEmpty())
           <section class="section related-products">

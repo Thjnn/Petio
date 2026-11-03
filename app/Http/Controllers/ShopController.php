@@ -35,6 +35,7 @@ class ShopController extends Controller
             ->take(4)
             ->get();
 
-        return view('shop.show', compact('product', 'related'));
+        $reviews=\App\Models\ProductReview::where('product_id',$product->id)->with('user')->latest()->paginate(5,['*'],'reviews');
+        return view('shop.show',compact('product','related','reviews'));
     }
 }

@@ -84,7 +84,7 @@
         <tr><td colspan="4" class="num">Giảm giá</td><td class="num">−{{ vnd($order->discount_amount) }}</td></tr>
       @endif
       <tr><td colspan="4" class="num">Phí ship</td><td class="num">{{ vnd($order->shipping_fee) }}</td></tr>
-      <tr><td colspan="4" class="num"><strong>Tổng cộng</strong></td><td class="num"><strong>{{ vnd($order->total_amount) }}</strong></td></tr>
+      <tr><td colspan="4" class="num">Giảm phí giao</td><td class="num">−{{ vnd($order->shipping_discount) }}</td></tr><tr><td colspan="4" class="num"><strong>Tổng cộng</strong></td><td class="num"><strong>{{ vnd($order->total_amount) }}</strong></td></tr>
     </table>
   </section>
 

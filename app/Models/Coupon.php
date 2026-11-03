@@ -18,9 +18,17 @@ class Coupon extends Model
         ];
     }
 
+    public function accountReason(?User $user): ?string {
+        if (($this->first_order_only || $this->new_account_days || $this->per_user_limit) && !$user) return 'Đăng nhập để dùng ưu đãi này.';
+        if ($this->new_account_days && (!$user->created_at || $user->created_at->lt(now()->subDays($this->new_account_days)))) return 'Chỉ dành cho tài khoản tạo trong '.$this->new_account_days.' ngày qua.';
+        if ($this->first_order_only && $user->orders()->where('status','!=','cancelled')->exists()) return 'Chỉ áp dụng cho đơn hàng đầu tiên.';
+        if ($this->per_user_limit && $user->orders()->where('status','!=','cancelled')->where(fn($q)=>$q->where('coupon_id',$this->id)->orWhere('shipping_coupon_id',$this->id))->count() >= $this->per_user_limit) return 'Bạn đã dùng hết lượt của mã này.';
+        return null;
+    }
     /** Lý do mã không dùng được cho đơn này, null = dùng được. */
     public function rejectReason(int $subtotal, ?User $user): ?string
     {
+        if ($reason=$this->accountReason($user)) return $reason;
         return match (true) {
             ! $this->is_active,
             $this->starts_at && $this->starts_at->isFuture(),

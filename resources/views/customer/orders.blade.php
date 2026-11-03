@@ -1,14 +1,11 @@
 @extends('customer.layout')
-@section('page-title','Đơn hàng của bạn')
+@section('page-title', 'Đơn hàng của bạn')
 @section('account-content')
-<div class="pc-heading"><div><span class="pc-eyebrow">TÀI KHOẢN PETIO</span><h1>Đơn hàng của bạn</h1><p>Theo dõi những món quà đang trên đường đến với bé.</p></div></div>
-
-<form method="get" class="pc-panel pc-filter"><label class="pc-sr-only" for="order-search">Tìm mã đơn hàng</label><input id="order-search" name="q" value="{{ request('q') }}" placeholder="Tìm theo mã đơn hàng…"><label class="pc-sr-only" for="order-status">Trạng thái</label><select id="order-status" name="status"><option value="">Tất cả trạng thái</option>@foreach(\App\Models\Order::STATUSES as $key=>$label)<option value="{{ $key }}" @selected(request('status')===$key)>{{ $label }}</option>@endforeach</select><button class="pc-btn">Tìm đơn</button></form>
-@forelse($orders as $o)
-<article class="pc-panel pc-order"><div class="pc-heading"><div><strong>#{{ $o->order_code }}</strong><small>{{ $o->created_at->format('d/m/Y • H:i') }}</small></div><span class="pc-badge status-{{ $o->status }}">{{ \App\Models\Order::STATUSES[$o->status] }}</span></div>
-@foreach($o->items->take(2) as $item) @include('customer.order-item') @endforeach
-@if($o->items->count()>2)<p class="pc-muted">Và {{ $o->items->count()-2 }} sản phẩm khác</p>@endif
-<div class="pc-order-foot"><span>Tổng thanh toán <strong>{{ vnd($o->total_amount) }}</strong></span><a class="pc-btn pc-btn-outline" href="{{ route('customer.orders.show',$o) }}">Xem chi tiết →</a></div>@include('customer.cancel-order', ['order'=>$o])</article>
-@empty<div class="pc-panel pc-empty"><span class="material-symbols-outlined">inventory_2</span><h2>Chưa tìm thấy đơn hàng</h2><p>Đơn hàng đặt bằng tài khoản này sẽ xuất hiện ở đây.</p><a class="pc-btn" href="{{ route('shop') }}">Dạo một vòng cửa hàng</a></div>@endforelse
-<div class="pc-pagination">{{ $orders->links('customer.pagination') }}</div>
+<header class="pc-page-head"><div><span class="pc-kicker">MY PETIO / ĐƠN HÀNG</span><h1>Quà của bé đến đâu rồi?</h1><p>Theo dõi, nhận hàng và chia sẻ trải nghiệm — ngay tại đây.</p></div><span class="pc-head-icon material-symbols-outlined">local_shipping</span></header>
+<nav class="pc-tabs" aria-label="Lọc trạng thái đơn">@foreach([''=>'Tất cả','pending'=>'Chờ xác nhận','confirmed'=>'Chờ giao hàng','shipping'=>'Đang giao','completed'=>'Hoàn thành','review'=>'Chờ đánh giá','cancelled'=>'Đã hủy','returned'=>'Trả hàng'] as $key=>$label)<a class="{{ (request('status')??'')===$key?'active':'' }}" href="{{ route('customer.orders',array_filter(['status'=>$key,'q'=>request('q')])) }}">{{ $label }}@if(isset($counts[$key]))<b>{{ $counts[$key] }}</b>@endif</a>@endforeach</nav>
+<form class="pc-search"><span class="material-symbols-outlined">search</span><label class="pc-sr-only" for="order-search">Tìm đơn hàng</label><input id="order-search" name="q" maxlength="50" value="{{ request('q') }}" placeholder="Tìm mã đơn hoặc tên sản phẩm…"><input type="hidden" name="status" value="{{ request('status') }}"><button class="pc-btn">Tìm kiếm</button></form>
+@forelse($orders as $o)<article class="pc-panel pc-order pc-commerce-order"><header class="pc-order-top"><div><span class="pc-store"><span class="material-symbols-outlined">pets</span> PETIO STORE</span><span class="pc-muted">#{{ $o->order_code }} · {{ $o->created_at->format('d/m/Y') }}</span></div><span class="pc-badge status-{{ $o->status }}">{{ \App\Models\Order::STATUSES[$o->status] }}</span></header>@foreach($o->items->take(3) as $item)@include('customer.order-item')@endforeach
+@if($o->items->count()>3)<a class="pc-more" href="{{ route('customer.orders.show',$o) }}">Xem thêm {{ $o->items->count()-3 }} sản phẩm ↓</a>@endif
+<footer class="pc-order-foot"><p>{{ $o->items->sum('quantity') }} sản phẩm · Tổng thanh toán <strong>{{ vnd($o->total_amount) }}</strong></p><div class="pc-actions"><a class="pc-btn pc-btn-outline" href="{{ route('customer.orders.show',$o) }}">Chi tiết đơn</a>@include('customer.order-actions',['order'=>$o])</div></footer>@include('customer.cancel-order',['order'=>$o])</article>
+@empty<div class="pc-panel pc-empty"><img src="{{ asset('assets/images/petio-package.svg') }}" alt="" width="100"><h2>Chưa có đơn ở mục này</h2><p>Thử một trạng thái khác hoặc tìm món quà mới cho bé.</p><a class="pc-btn" href="{{ route('shop') }}">Khám phá cửa hàng</a></div>@endforelse<div class="pc-pagination">{{ $orders->links('customer.pagination') }}</div>
 @endsection

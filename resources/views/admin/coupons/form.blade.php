@@ -60,6 +60,7 @@
       <input type="hidden" name="is_active" value="0" />
       <label class="check"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $coupon->is_active)) /> Đang bật</label>
     </div>
+    <label class="field"><span>Nhóm ưu đãi</span><select name="scope">@foreach(['product'=>'Giảm giá sản phẩm','shipping'=>'Giảm phí vận chuyển'] as $v=>$label)<option value="{{ $v }}" @selected(old('scope',$coupon->scope??'product')===$v)>{{ $label }}</option>@endforeach</select></label><label class="field"><span>Hình thức giao (chỉ mã vận chuyển)</span><select name="shipping_method"><option value="">Mọi hình thức</option>@foreach(['standard'=>'Tiêu chuẩn','express'=>'Hỏa tốc'] as $v=>$label)<option value="{{ $v }}" @selected(old('shipping_method',$coupon->shipping_method)===$v)>{{ $label }}</option>@endforeach</select></label><label class="field"><span>Tài khoản tạo trong số ngày (trống = mọi tài khoản)</span><input type="number" name="new_account_days" min="1" max="365" value="{{ old('new_account_days',$coupon->new_account_days) }}"></label><label class="field"><span>Số lượt / tài khoản (trống = không giới hạn)</span><input type="number" name="per_user_limit" min="1" max="1000" value="{{ old('per_user_limit',$coupon->per_user_limit) }}"></label>
     <div class="form-actions field-full">
       <button class="btn btn-primary" type="submit">Lưu</button>
     </div>

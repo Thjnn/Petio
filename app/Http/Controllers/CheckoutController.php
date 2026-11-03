@@ -31,12 +31,13 @@ class CheckoutController extends Controller
             $addresses = CustomerAddress::where('user_id', $request->user()->id)->orderByDesc('is_default')->get();
             $selectedAddress = $addresses->firstWhere('id', (int) $request->old('address_id', $request->query('address_id'))) ?? $addresses->first();
         }
-        $coupons = Coupon::where('is_active', true)->get()->filter(fn ($coupon) => $coupon->rejectReason($subtotal, $request->user()) === null);
+        $coupons = Coupon::where('is_active', true)->get();
 
         return view('checkout.index', [
             'addresses' => $addresses,
             'selectedAddress' => $selectedAddress,
             'coupons' => $coupons,
+            'selectedShippingCoupon'=>is_string($request->query('shipping_coupon'))?mb_substr($request->query('shipping_coupon'),0,30):'',
             'selectedCoupon' => is_string($request->query('coupon')) ? mb_substr($request->query('coupon'), 0, 30) : '',
             'lines' => $lines,
             'subtotal' => $subtotal,
@@ -67,15 +68,19 @@ class CheckoutController extends Controller
             'note' => 'nullable|string|max:500',
             'payment_method' => ['required', Rule::in(array_keys(Order::PAYMENT_METHODS))],
             'coupon_code' => 'nullable|string|max:30',
+            'shipping_coupon_code'=>'nullable|string|max:30',
+            'shipping_method'=>'nullable|in:standard,express',
         ], [
             'required' => 'Vui lòng nhập đầy đủ thông tin nhận hàng.',
             'receiver_phone.regex' => 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0.',
             'receiver_email.email' => 'Email không hợp lệ.',
         ]);
 
+        $data['shipping_method']=$data['shipping_method']??'standard';
         $user = $request->user();
 
         $order = DB::transaction(function () use ($data, $user) {
+            if($user) \App\Models\User::whereKey($user->id)->lockForUpdate()->firstOrFail();
             // Khóa các dòng tồn kho trong lúc đặt để hai người không cùng mua món cuối cùng.
             $qty = Cart::quantities();
             $variants = ProductVariant::with('product')->whereIn('id', array_keys($qty))
@@ -95,34 +100,26 @@ class CheckoutController extends Controller
 
             $subtotal = $variants->sum(fn ($v) => $v->price * $qty[$v->id]);
 
-            $coupon = null;
-            $discount = 0;
-            if (! empty($data['coupon_code'])) {
-                $coupon = Coupon::where('code', strtoupper(trim($data['coupon_code'])))->lockForUpdate()->first();
-                $reason = $coupon ? $coupon->rejectReason($subtotal, $user) : 'Mã giảm giá không tồn tại.';
-                if ($reason) {
-                    throw ValidationException::withMessages(['coupon_code' => $reason]);
-                }
-                $discount = $coupon->discountFor($subtotal);
-                $coupon->increment('used_count');
-            }
-
-            $shippingFee = Cart::shippingFee($subtotal);
+            $quote=app(\App\Support\CheckoutPricing::class)->quote($subtotal,$user,$data,true);
+            foreach(['coupon','shipping_coupon'] as $key)if($quote[$key])$quote[$key]->increment('used_count');
 
             $order = Order::create([
                 'order_code' => 'PT'.now()->format('ymd').'-'.Str::upper(Str::random(5)),
                 'user_id' => $user?->id,
-                'coupon_id' => $coupon?->id,
+                'coupon_id'=>$quote['coupon']?->id,
+                'shipping_coupon_id'=>$quote['shipping_coupon']?->id,
+                'shipping_discount'=>$quote['shipping_discount'],
                 'subtotal' => $subtotal,
-                'discount_amount' => $discount,
-                'shipping_fee' => $shippingFee,
-                'total_amount' => $subtotal - $discount + $shippingFee,
-            ] + collect($data)->except('coupon_code')->all());
+                'discount_amount'=>$quote['discount'],
+                'shipping_fee'=>$quote['shipping_fee'],
+                'total_amount'=>$quote['total'],
+            ] + collect($data)->except(['coupon_code','shipping_coupon_code'])->all());
 
             foreach ($variants as $v) {
                 $order->items()->create([
                     'variant_id' => $v->id,
                     'product_name' => $v->product->name,
+                    'image_url'=>$v->product->thumbnail_url,
                     'variant_name' => $v->name,
                     'sku' => $v->sku,
                     'unit_price' => $v->price,
@@ -147,14 +144,12 @@ class CheckoutController extends Controller
 
     public function coupon(Request $request)
     {
-        $data = $request->validate(['coupon_code' => 'required|string|max:30']);
-        $subtotal = Cart::lines()->sum('line_total');
-        $coupon = Coupon::where('code', strtoupper(trim($data['coupon_code'])))->first();
-        $reason = $coupon ? $coupon->rejectReason($subtotal, $request->user()) : 'Mã giảm giá không tồn tại.';
-        if ($reason) {
-            throw ValidationException::withMessages(['coupon_code' => $reason]);
+        $data=$request->validate(['coupon_code'=>'nullable|string|max:30','shipping_coupon_code'=>'nullable|string|max:30','shipping_method'=>'nullable|in:standard,express','ship_province'=>'nullable|string|max:100','address_id'=>'nullable|integer']);
+        if($request->filled('address_id') && $request->user()){
+            $a=CustomerAddress::where('user_id',$request->user()->id)->findOrFail($data['address_id']);$data['ship_province']=$a->ship_province;
         }
-        return response()->json(['discount' => $coupon->discountFor($subtotal), 'total' => $subtotal - $coupon->discountFor($subtotal) + Cart::shippingFee($subtotal)]);
+        $quote=app(\App\Support\CheckoutPricing::class)->quote(Cart::lines()->sum('line_total'),$request->user(),$data);
+        unset($quote['coupon'],$quote['shipping_coupon']);return response()->json($quote);
     }
 
     public function success(Request $request, Order $order)

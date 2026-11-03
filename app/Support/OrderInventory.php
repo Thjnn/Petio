@@ -21,8 +21,8 @@ class OrderInventory
                 }
             }
         }
-        if ($releaseCoupon && $order->coupon_id) {
-            DB::table('coupons')->where('id', $order->coupon_id)->where('used_count', '>', 0)->decrement('used_count');
+        if($releaseCoupon)foreach(array_filter([$order->coupon_id,$order->shipping_coupon_id]) as $id){
+            DB::table('coupons')->where('id',$id)->where('used_count','>',0)->decrement('used_count');
         }
     }
 }
