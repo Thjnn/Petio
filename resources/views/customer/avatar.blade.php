@@ -1,0 +1,2 @@
+@php($u=$u ?? auth()->user())
+@if($u->avatar_url)<img class="pc-avatar" src="{{ $u->avatarSrc() }}" alt="Ảnh đại diện của {{ $u->displayName() }}">@else<span class="pc-avatar pc-avatar-letter">{{ mb_substr($u->displayName(),0,1) }}</span>@endif
