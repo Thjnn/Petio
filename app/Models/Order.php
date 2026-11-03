@@ -17,7 +17,7 @@ class Order extends Model
 
     public const STATUSES = [
         'pending' => 'Chờ xác nhận',
-        'confirmed' => 'Đã xác nhận',
+        'confirmed' => 'Chờ giao hàng',
         'shipping' => 'Đang giao',
         'completed' => 'Hoàn thành',
         'cancelled' => 'Đã hủy',
@@ -35,7 +35,7 @@ class Order extends Model
 
     protected function casts(): array
     {
-        return ['paid_at' => 'datetime'];
+        return ['paid_at' => 'datetime','received_at'=>'datetime'];
     }
 
     public function getRouteKeyName(): string

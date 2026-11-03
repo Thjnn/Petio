@@ -37,10 +37,55 @@ class AccountController extends Controller
             'shippingCount' => $r->user()->orders()->where('status', 'shipping')->count(),
             'favoriteCount' => DB::table('customer_favorites')->where('user_id', $r->user()->id)->count(),
             'unreadCount' => $this->notices($r)->whereNull('s.read_at')->count(),
-            'recentOrders' => $r->user()->orders()->latest()->limit(2)->get(),
+            'recentOrders' => $r->user()->orders()->with('items.variant.product')->latest()->limit(2)->get(),
         ]);
     }
 
+    public function buyAgain(Request $r, Order $order){
+        abort_unless((int)$order->user_id===(int)$r->user()->id,404);$added=0;$skipped=0;
+        foreach($order->items()->with('variant.product')->get() as $item){
+            $v=$item->variant;if(!$v || !$v->is_active || !$v->product?->is_active){$skipped++;continue;}
+            $current=\App\Support\Cart::quantities()[$v->id]??0;
+            $qty=min($item->quantity,max(0,$v->stock_qty-$current),max(0,\App\Support\Cart::MAX_QTY-$current));
+            if($qty>0){\App\Support\Cart::set($v->id,$current+$qty);$added+=$qty;}if($qty<$item->quantity)$skipped++;
+        }
+        if(!$added)return back()->withErrors(['cart'=>'Các sản phẩm hiện không còn đủ tồn kho để thêm.']);
+        return redirect()->route('checkout.index')->with('success','Đã thêm '.$added.' sản phẩm theo giá hiện tại.'.($skipped?' Một số sản phẩm hết hàng hoặc không đủ số lượng; hãy kiểm tra lại giỏ.':''));
+    }
+    public function receiveOrder(Request $r, Order $order){
+        abort_unless((int)$order->user_id===(int)$r->user()->id,404);
+        DB::transaction(function()use($r,$order){
+            $o=Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+            if(!in_array($o->status,['shipping','completed'],true)||$o->received_at)throw \Illuminate\Validation\ValidationException::withMessages(['order'=>'Đơn chưa được giao hoặc bạn đã xác nhận nhận hàng.']);
+            $from=$o->status;$o->update(['status'=>'completed','received_at'=>now()]);
+            $o->statusHistory()->create(['from_status'=>$from,'to_status'=>'completed','changed_by'=>$r->user()->id,'note'=>'Khách hàng xác nhận đã nhận đủ sản phẩm.']);
+        },3);
+        return redirect()->route('customer.orders.show',$order)->with('success','Đã xác nhận nhận hàng. Hãy chia sẻ đánh giá về sản phẩm nhé!');
+    }
+    public function review(Request $r, Order $order, int $item){
+        abort_unless((int)$order->user_id===(int)$r->user()->id,404);
+        $data=$r->validate(['rating'=>'required|integer|between:1,5','content'=>'required|string|min:10|max:2000']);
+        DB::transaction(function()use($r,$order,$item,$data){
+            $o=Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+            if($o->status!=='completed'||!$o->received_at)throw \Illuminate\Validation\ValidationException::withMessages(['review'=>'Hãy xác nhận đã nhận hàng trước khi đánh giá.']);
+            $line=$o->items()->findOrFail($item);
+            if($line->review()->exists())throw \Illuminate\Validation\ValidationException::withMessages(['review'=>'Bạn đã đánh giá sản phẩm trong đơn này.']);
+            $product=$line->variant?->product;
+            if(!$product)throw \Illuminate\Validation\ValidationException::withMessages(['review'=>'Sản phẩm không còn trong danh mục. Hãy liên hệ hỗ trợ.']);
+            $product=Product::whereKey($product->id)->lockForUpdate()->firstOrFail();
+            $line->review()->create($data+['user_id'=>$r->user()->id,'product_id'=>$product->id]);
+            $count=(int)$product->rating_count;
+            $product->update(['rating_avg'=>round(($product->rating_avg*$count+$data['rating'])/($count+1),1),'rating_count'=>$count+1]);
+        },3);
+        return back()->with('success','Cảm ơn bạn! Đánh giá đã được lưu và hiển thị tại trang sản phẩm.');
+    }
+    public function defaultAddress(Request $r,int $address){
+        DB::transaction(function()use($r,$address){
+            User::whereKey($r->user()->id)->lockForUpdate()->firstOrFail();$a=$this->addresses($r)->findOrFail($address);
+            $this->addresses($r)->update(['is_default'=>false]);$a->update(['is_default'=>true]);
+        });
+        return back()->with('success','Đã đặt địa chỉ mặc định cho lần thanh toán tiếp theo.');
+    }
     public function profile()
     {
         return view('customer.profile');
@@ -133,26 +178,27 @@ class AccountController extends Controller
 
     public function orders(Request $r)
     {
-        $r->validate(['status' => ['nullable', Rule::in(array_keys(Order::STATUSES))], 'q' => 'nullable|string|max:50']);
-        $orders = $r->user()->orders()->with('items.variant.product')
-            ->when($r->status, fn ($q, $s) => $q->where('status', $s))
-            ->when($r->q, fn ($q, $s) => $q->where('order_code', 'like', '%'.$s.'%'))
+        $r->validate(['status' => ['nullable', Rule::in([...array_keys(Order::STATUSES),'review'])], 'q' => 'nullable|string|max:50']);
+        $orders = $r->user()->orders()->with(['items.variant.product','items.review'])
+            ->when($r->status,fn($q,$s)=>$s==='review'?$q->where('status','completed')->whereNotNull('received_at')->whereHas('items',fn($i)=>$i->doesntHave('review')):$q->where('status',$s))
+            ->when($r->q, fn ($q, $s) => $q->where(fn($w)=>$w->where('order_code','like','%'.$s.'%')->orWhereHas('items',fn($i)=>$i->where('product_name','like','%'.$s.'%'))))
             ->latest()->paginate(8)->withQueryString();
 
-        return view('customer.orders', compact('orders'));
+        return view('customer.orders',['orders'=>$orders,'counts'=>$r->user()->orders()->selectRaw('status,count(*) as total')->groupBy('status')->pluck('total','status')]);
     }
 
     public function order(Request $r, Order $order)
     {
         abort_unless((int) $order->user_id === $r->user()->id, 404);
-        $order->load('items.variant.product', 'statusHistory');
+        $order->load('items.variant.product','items.review','statusHistory');
 
         return view('customer.order', compact('order'));
     }
 
     public function favorites(Request $r)
     {
-        $products = Product::forCard()->whereIn('id', DB::table('customer_favorites')->select('product_id')->where('user_id', $r->user()->id))->paginate(12);
+        $r->validate(['q'=>'nullable|string|max:80']);
+        $products = Product::forCard()->when($r->q,fn($q,$term)=>$q->where('name','like','%'.$term.'%'))->whereIn('id', DB::table('customer_favorites')->select('product_id')->where('user_id', $r->user()->id))->paginate(12);
 
         return view('customer.favorites', compact('products'));
     }
@@ -194,7 +240,8 @@ class AccountController extends Controller
 
     public function coupons(Request $r)
     {
-        $coupons = Coupon::where('is_active', true)->orderBy('expires_at')->get();
+        $r->validate(['q'=>'nullable|string|max:60','type'=>'nullable|in:product,shipping,new']);
+        $coupons=Coupon::where('is_active',true)->when($r->q,fn($q,$term)=>$q->where(fn($w)=>$w->where('code','like','%'.$term.'%')->orWhere('description','like','%'.$term.'%')))->when($r->type,fn($q,$type)=>$type==='new'?$q->where(fn($w)=>$w->where('first_order_only',true)->orWhereNotNull('new_account_days')):$q->where('scope',$type))->orderBy('expires_at')->get();
 
         return view('customer.coupons', compact('coupons'));
     }

@@ -1,4 +1,1 @@
-<div class="pc-order-item">
-  <div><strong>{{ $item->product_name }}</strong><p>{{ $item->variant_name }} · Số lượng: {{ $item->quantity }}</p></div>
-  <strong>{{ vnd($item->line_total) }}</strong>
-</div>
+<div class="pc-order-item pc-product-line"><img src="{{ $item->imageSrc() }}" alt="{{ $item->product_name }}" loading="lazy" width="88" height="88" data-image-fallback="{{ asset('assets/images/petio-package.svg') }}"><div>@if($item->variant?->product?->is_active)<a href="{{ route('products.show',$item->variant->product) }}"><strong>{{ $item->product_name }}</strong></a>@else<strong>{{ $item->product_name }}</strong>@endif<p>{{ $item->variant_name }} <span>× {{ $item->quantity }}</span></p><small>{{ vnd($item->unit_price) }} / sản phẩm</small></div><strong>{{ vnd($item->line_total) }}</strong></div>

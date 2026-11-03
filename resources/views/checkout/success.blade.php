@@ -36,7 +36,7 @@
           <dt>Giảm giá</dt><dd>−{{ vnd($order->discount_amount) }}</dd>
         @endif
         <dt>Phí vận chuyển</dt><dd>{{ $order->shipping_fee ? vnd($order->shipping_fee) : 'Miễn phí' }}</dd>
-        <dt class="grand">Tổng thanh toán</dt><dd class="grand">{{ vnd($order->total_amount) }}</dd>
+        <dt>Giảm phí giao</dt><dd>−{{ vnd($order->shipping_discount) }}</dd><dt class="grand">Tổng thanh toán</dt><dd class="grand">{{ vnd($order->total_amount) }}</dd>
       </dl>
 
       <p>

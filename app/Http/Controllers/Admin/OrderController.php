@@ -42,6 +42,7 @@ class OrderController extends Controller
             if (in_array($order->status, Order::FINAL_STATUSES, true) && $data['status'] !== $order->status) {
                 throw \Illuminate\Validation\ValidationException::withMessages(['status' => 'Đơn đã hủy/trả hàng, không đổi trạng thái được nữa.']);
             }
+            if(($order->status==='completed'&&!in_array($data['status'],['completed','returned'],true))||($order->status==='shipping'&&in_array($data['status'],['pending','confirmed'],true)))throw \Illuminate\Validation\ValidationException::withMessages(['status'=>'Không thể chuyển ngược trạng thái đơn đã giao.']);
             $from = $order->status;
             if ($from !== $data['status'] && in_array($data['status'], Order::FINAL_STATUSES, true)) {
                 app(\App\Support\OrderInventory::class)->restore($order, $data['status'] === 'cancelled');

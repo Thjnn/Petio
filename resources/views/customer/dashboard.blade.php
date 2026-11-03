@@ -3,7 +3,7 @@
 @section('account-content')
 @php($u=auth()->user())
 <section class="pc-welcome">
- <div class="pc-welcome-copy"><span class="pc-kicker">MY PETIO / GÓC CỦA SEN</span><div class="pc-welcome-person">@include('customer.avatar')<span>Rất vui được gặp lại bạn</span></div><h1>Chào {{ $u->displayName() }}!<br><em>Yêu thương bắt đầu<br>từ những điều nhỏ.</em></h1><p>Đơn hàng, ưu đãi và những món bé thích —<br>tất cả ở ngay trong góc nhỏ của bạn.</p><a class="pc-btn" href="{{ route('shop') }}">Chọn quà cho bé <span>↗</span></a></div>
+ <div class="pc-welcome-copy"><span class="pc-kicker">MY PETIO / GÓC CỦA SEN</span><div class="pc-welcome-person">@include('customer.avatar')<span>Rất vui được gặp lại bạn</span></div><h1>Chào {{ $u->full_name ?: 'sen' }}!<br><em>Yêu thương bắt đầu<br>từ những điều nhỏ.</em></h1><p>Đơn hàng, ưu đãi và những món bé thích —<br>tất cả ở ngay trong góc nhỏ của bạn.</p><a class="pc-btn" href="{{ route('shop') }}">Chọn quà cho bé <span>↗</span></a></div>
  <div class="pc-welcome-visual"><span class="pc-circle"></span><img src="{{ asset('assets/file_anh/images-chotrang-removebg-preview.png') }}" alt="Người bạn bốn chân của Petio"><span class="pc-floating-tag">Một chiếc đuôi vui.<br><strong>Một ngày thật đẹp.</strong></span><span class="material-symbols-outlined pc-floating-paw">pets</span></div>
 </section>
 <div class="pc-stats">
@@ -18,5 +18,6 @@
  @endforeach
  <form class="pc-hub-card pc-hub-logout" method="post" action="{{ route('logout') }}">@csrf<button type="submit"><span class="material-symbols-outlined">logout</span><h3>Đăng xuất</h3><p>Hẹn gặp lại bạn và bé cưng!</p></button></form>
 </div>
+@if($recentOrders->isNotEmpty())<section class="pc-bottom"><div class="pc-heading"><h2>Đơn hàng gần đây</h2><a href="{{ route('customer.orders') }}" class="pc-text-link">Xem tất cả →</a></div><div class="pc-address-grid">@foreach($recentOrders as $recent)<article class="pc-panel"><div class="pc-heading"><strong>#{{ $recent->order_code }}</strong><span class="pc-badge">{{ \App\Models\Order::STATUSES[$recent->status] }}</span></div>@foreach($recent->items->take(1) as $item)@include('customer.order-item')@endforeach<div class="pc-order-foot"><strong>{{ vnd($recent->total_amount) }}</strong><a href="{{ route('customer.orders.show',$recent) }}" class="pc-text-link">Theo dõi đơn →</a></div></article>@endforeach</div></section>@endif
 <div class="pc-bottom pc-bottom-banner"><div><span class="pc-kicker">MỘT CHÚT NUÔNG CHIỀU</span><h2>Đến giờ thư giãn của bé rồi!</h2><p>Khám phá dịch vụ tắm, vệ sinh và chăm sóc tại Petio.</p></div><a class="pc-btn pc-btn-outline" href="{{ route('spa') }}">Khám phá dịch vụ ↗</a></div>
 @endsection

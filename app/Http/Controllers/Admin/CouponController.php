@@ -52,6 +52,10 @@ class CouponController extends Controller
 
         $data = $request->validate([
             'code' => ['required', 'alpha_dash', 'max:30', Rule::unique('coupons')->ignore($coupon->id)],
+            'scope'=>'nullable|in:product,shipping',
+            'shipping_method'=>'nullable|in:standard,express',
+            'new_account_days'=>'nullable|integer|min:1|max:365',
+            'per_user_limit'=>'nullable|integer|min:1|max:1000',
             'description' => 'nullable|string|max:255',
             'discount_type' => 'required|in:percent,fixed',
             'discount_value' => ['required', 'integer', 'min:1', $request->discount_type === 'percent' ? 'max:100' : 'max:100000000'],
@@ -62,6 +66,8 @@ class CouponController extends Controller
             'expires_at' => 'nullable|date|after_or_equal:starts_at',
         ], ['code.unique' => 'Mã này đã tồn tại.', 'discount_value.max' => 'Phần trăm giảm tối đa 100.']);
 
+        $data['scope']=$data['scope']??$coupon->scope??'product';
+        if($data['scope']==='product')$data['shipping_method']=null;
         $coupon->fill([
             'min_order_value' => $data['min_order_value'] ?? 0,
             'first_order_only' => $request->boolean('first_order_only'),

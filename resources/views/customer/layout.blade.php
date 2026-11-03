@@ -1,10 +1,11 @@
 @extends('layouts.app')
 @section('title', 'Tài khoản của tôi – Petio')
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/customer.css') }}?v=2">
-<link rel="stylesheet" href="{{ asset('assets/css/customer-refresh.css') }}?v=2">
+<link rel="stylesheet" href="{{ asset('assets/css/customer.css') }}?v=3">
+<link rel="stylesheet" href="{{ asset('assets/css/customer-refresh.css') }}?v=3">
+<link rel="stylesheet" href="{{ asset('assets/css/customer-commerce.css') }}?v=3">
 @endpush
-@push('scripts')<script src="{{ asset('assets/js/customer.js') }}?v=2" defer></script>@endpush
+@push('scripts')<script src="{{ asset('assets/js/customer.js') }}?v=3" defer></script><script src="{{ asset('assets/js/customer-commerce.js') }}?v=3" defer></script>@endpush
 @section('content')
 @php
  $u=auth()->user();

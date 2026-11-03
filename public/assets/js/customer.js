@@ -1,8 +1,8 @@
 document.addEventListener('click', async function (e) {
  const button=e.target.closest('[data-copy]'); if(!button) return;
- const status=document.getElementById('pc-copy-status');
+ const status=document.getElementById('pc-copy-status') || document.getElementById('pc-copy-feedback');
  try { await navigator.clipboard.writeText(button.dataset.copy); button.textContent='Đã sao chép ✓'; if(status)status.textContent='Đã sao chép mã '+button.dataset.copy; }
- catch(error) { if(status)status.textContent='Hãy chọn và sao chép mã: '+button.dataset.copy; }
+ catch(error) { const input=document.createElement('textarea');input.value=button.dataset.copy;input.style.position='fixed';input.style.opacity='0';document.body.append(input);input.select();const copied=document.execCommand('copy');input.remove();if(status)status.textContent=copied?'Đã sao chép mã '+button.dataset.copy:'Hãy chọn và sao chép mã: '+button.dataset.copy;if(copied)button.textContent='Đã sao chép ✓'; }
 });
 document.addEventListener('submit',function(e){if(e.target.matches('[data-confirm]')&&!confirm(e.target.dataset.confirm))e.preventDefault();});
 // Preview first, then explicitly save the avatar in its own form.
