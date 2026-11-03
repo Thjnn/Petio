@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -44,6 +45,7 @@ class AuthController extends Controller
 
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
+        Cart::mergeGuestCart();
         $user->forceFill(['last_login_at' => now()])->save();
 
         return redirect()->intended($user->can('admin') ? route('admin.dashboard') : route('home'))->with('success', 'Chào mừng '.$user->displayName().' quay lại Petio!');
@@ -83,6 +85,7 @@ class AuthController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
+        Cart::mergeGuestCart();
 
         return redirect()->route('home')->with('success', 'Đăng ký thành công! Chào mừng bạn đến với Petio 🎉');
     }
