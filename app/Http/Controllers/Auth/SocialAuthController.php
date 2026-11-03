@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\SocialAccount;
 use App\Models\User;
+use App\Support\Cart;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -60,6 +61,7 @@ class SocialAuthController extends Controller
 
         Auth::login($user, true);
         $request->session()->regenerate();
+        Cart::mergeGuestCart();
         $user->forceFill(['last_login_at' => now()])->save();
 
         return redirect()->to($user->can('admin') ? route('admin.dashboard') : route('customer.dashboard'))
