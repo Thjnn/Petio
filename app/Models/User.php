@@ -35,6 +35,17 @@ class User extends Authenticatable
         return $this->status === 'active';
     }
 
+    public function avatarSrc(): ?string
+    {
+        if (! $this->avatar_url) {
+            return null;
+        }
+        if (str_starts_with($this->avatar_url, 'storage/avatars/')) {
+            return route('customer.avatar', ['v' => substr(sha1($this->avatar_url), 0, 12)]);
+        }
+        return asset($this->avatar_url);
+    }
+
     public function displayName(): string
     {
         return $this->full_name ?: $this->username;

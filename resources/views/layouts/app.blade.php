@@ -1,7 +1,9 @@
 <!doctype html>
-<html lang="vi">
+<html lang="vi" translate="no" class="notranslate">
   <head>
     <meta charset="UTF-8" />
+    {{-- Nội dung đã là tiếng Việt; tự dịch sẽ làm hỏng tên glyph của Material Symbols. --}}
+    <meta name="google" content="notranslate" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>@yield('title', 'Petio')</title>
